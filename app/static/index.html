@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Product Recommender Demo</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; }
+      .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+      .row { display: flex; gap: 1rem; align-items: center; }
+      .muted { color: #666; font-size: 0.9rem; }
+      button { padding: 0.5rem 1rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Product Recommender Demo</h1>
+    <div class="row">
+      <button id="seed">Load sample data</button>
+      <button id="rec1">Recommend for user 1</button>
+      <button id="rec2">Recommend for user 2</button>
+    </div>
+    <p class="muted">Start the API first. Then click "Load sample data" and request recommendations.</p>
+    <div id="results"></div>
+
+    <script>
+      async function seed() {
+        await fetch('/load-sample-data', { method: 'POST' });
+      }
+      async function rec(userId) {
+        const r = await fetch('/recommendations', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, k: 5 })
+        });
+        const data = await r.json();
+        const root = document.getElementById('results');
+        root.innerHTML = '';
+        data.forEach(p => {
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.innerHTML = `<h3>${p.name} - $${p.price}</h3>
+            <div class="muted">Tags: ${p.tags.join(', ')}</div>
+            <p>${p.explanation}</p>`;
+          root.appendChild(div);
+        });
+      }
+      document.getElementById('seed').onclick = seed;
+      document.getElementById('rec1').onclick = () => rec(1);
+      document.getElementById('rec2').onclick = () => rec(2);
+    </script>
+  </body>
+</html>
