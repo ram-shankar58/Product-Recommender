@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 from typing import List, Optional
 from .db.database import init_db, get_session
@@ -11,6 +12,7 @@ import asyncio
 from .llm.explainer import explain
 from dotenv import load_dotenv
 import os
+import csv
 
 app = FastAPI(title="Product Recommender API")
 
@@ -24,7 +26,11 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup():
-    load_dotenv()
+    # Load environment variables if a .env file exists at project root
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    env_path = os.path.join(root, ".env")
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
     init_db()
 
 class Behavior(BaseModel):
@@ -133,3 +139,68 @@ def root():
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.isdir(static_dir):
     app.mount("/demo", StaticFiles(directory=static_dir, html=True), name="demo")
+
+
+@app.post("/import-csv")
+def import_csv(session: Session = Depends(get_session)):
+    """Import products, users, and interactions from CSV files in ./data.
+    Files: data/products.csv, data/users.csv, data/interactions.csv
+    """
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    data_dir = os.path.join(root, "data")
+    prod_path = os.path.join(data_dir, "products.csv")
+    users_path = os.path.join(data_dir, "users.csv")
+    inter_path = os.path.join(data_dir, "interactions.csv")
+
+    created = {"products": 0, "users": 0, "interactions": 0}
+
+    if os.path.exists(prod_path):
+        with open(prod_path, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                p = Product(
+                    id=int(row["id"]) if row.get("id") else None,
+                    name=row.get("name", ""),
+                    description=row.get("description", ""),
+                    price=float(row.get("price", 0) or 0),
+                    tags=row.get("tags", ""),
+                    popularity=int(row.get("popularity", 0) or 0),
+                )
+                session.add(p)
+                created["products"] += 1
+
+    if os.path.exists(users_path):
+        with open(users_path, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                u = User(
+                    id=int(row["id"]) if row.get("id") else None,
+                    name=row.get("name", "")
+                )
+                session.add(u)
+                created["users"] += 1
+
+    session.commit()
+
+    if os.path.exists(inter_path):
+        with open(inter_path, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                it = Interaction(
+                    id=int(row["id"]) if row.get("id") else None,
+                    user_id=int(row.get("user_id")),
+                    product_id=int(row.get("product_id")),
+                    event=row.get("event", "view"),
+                )
+                session.add(it)
+                created["interactions"] += 1
+        session.commit()
+
+    return {"status": "imported", **created}
+
+
+@app.get("/favicon.ico")
+def favicon():
+    # Serve favicon if present, otherwise return 204 to avoid 404 spam in logs
+    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    icon_path = os.path.join(static_dir, "favicon.ico")
+    if os.path.exists(icon_path):
+        return FileResponse(icon_path, media_type="image/x-icon")
+    return Response(status_code=204)

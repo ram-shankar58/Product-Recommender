@@ -1,0 +1,4 @@
+transformers==4.45.2
+# For CPU-only installs, HuggingFace often runs fine with PyTorch optional for text2text on some models
+# If you need torch for your chosen model:
+# torch==2.4.1+cpu  # Or install from https://pytorch.org/get-started/locally/
