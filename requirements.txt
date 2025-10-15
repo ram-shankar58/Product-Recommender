@@ -10,3 +10,4 @@ pytest
 anyio
 transformers
 torch
+psycopg2-binary

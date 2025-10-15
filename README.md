@@ -4,11 +4,11 @@ Minimal demo that combines a simple recommender with LLM-powered explanations.
 
 ## Features
 - FastAPI backend exposing recommendations API
-- SQLite database (SQLModel) for products and user interactions
+- SQLite database (SQLModel) for products and user interactions - **PostgreSQL & MySQL supported**
 - Simple tag-based recommender with popularity boost
 - LLM wrapper that calls OpenAI if `OPENAI_API_KEY` is set, otherwise returns deterministic explanations
 - Sample data loader and tests
-- Optional static dashboard page to preview recommendations
+- **Modern, animated dashboard** with gradient design and smooth UX
 
 ## Requirements
 - Python 3.10+
@@ -55,6 +55,23 @@ curl -X POST http://localhost:8000/import-csv
 
 ## Notes
 - This is a starting point. Replace the recommender with a learned model or extend the schema for production use.
+
+## Database options
+- **SQLite (default)**: Great for development, single-file database (`recs.db`)
+- **PostgreSQL**: Production-ready, set `DATABASE_URL=postgresql://user:password@localhost/dbname`
+- **MySQL**: Also supported, set `DATABASE_URL=mysql://user:password@localhost/dbname`
+
+Example PostgreSQL setup (fish):
+```fish
+# Install PostgreSQL driver
+pip install psycopg2-binary
+
+# Set connection string
+set -x DATABASE_URL postgresql://myuser:mypass@localhost/recommender_db
+
+# Run migrations (creates tables)
+uvicorn app.main:app --reload --port 8000
+```
 
 ## LLM backends
 - Auto (default): uses OpenAI if `OPENAI_API_KEY` is set; otherwise returns a deterministic explanation.

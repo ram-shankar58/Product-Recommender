@@ -3,8 +3,23 @@ from .models import Product, User, Interaction
 from typing import Iterator
 import os
 
+# Support multiple database backends
+# SQLite: sqlite:///./recs.db (default, local file)
+# PostgreSQL: postgresql://user:pass@localhost/dbname
+# MySQL: mysql://user:pass@localhost/dbname
 DB_URL = os.getenv("DATABASE_URL", "sqlite:///./recs.db")
-engine = create_engine(DB_URL, echo=False)
+
+# PostgreSQL requires pool configuration for production
+connect_args = {}
+if DB_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
+engine = create_engine(
+    DB_URL, 
+    echo=False,
+    connect_args=connect_args,
+    pool_pre_ping=True  # verify connections before use
+)
 
 
 def init_db() -> None:
