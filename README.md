@@ -2,6 +2,11 @@
 
 Minimal demo that combines a simple recommender with LLM-powered explanations.
 
+## Demo video
+
+https://drive.google.com/file/d/1AcInfxBPaBhBCGA8EL1K-g1jPQNgyj2I/view?usp=sharing
+
+
 ## Features
 - FastAPI backend exposing recommendations API
 - SQLite database (SQLModel) for products and user interactions - **PostgreSQL & MySQL supported**
@@ -93,11 +98,6 @@ python scripts/convert_dataset.py
 ```
 Supports: Brazilian E-Commerce (100K orders), Instacart, H&M datasets
 
-## Demo video
-- Record 2–3 minutes: start server, load data, request recommendations, and show explanations.
-
-## Notes
-- This is a starting point. Replace the recommender with a learned model or extend the schema for production use.
 
 ## Database options
 - **SQLite (default)**: Great for development, single-file database (`recs.db`)

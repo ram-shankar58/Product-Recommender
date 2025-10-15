@@ -1,91 +1,31 @@
 id,name,description,price,tags,popularity
-1,Essence Mascara Lash Princess,The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.,9.99,"beauty,Essence",51
-2,Eyeshadow Palette with Mirror,"The Eyeshadow Palette with Mirror offers a versatile range of eyeshadow shades for creating stunning eye looks. With a built-in mirror, it's convenient for on-the-go makeup application.",19.99,"beauty,Glamour Beauty",57
-3,Powder Canister,"The Powder Canister is a finely milled setting powder designed to set makeup and control shine. With a lightweight and translucent formula, it provides a smooth and matte finish.",14.99,"beauty,Velvet Touch",92
-4,Red Lipstick,"The Red Lipstick is a classic and bold choice for adding a pop of color to your lips. With a creamy and pigmented formula, it provides a vibrant and long-lasting finish.",12.99,"beauty,Chic Cosmetics",87
-5,Red Nail Polish,"The Red Nail Polish offers a rich and glossy red hue for vibrant and polished nails. With a quick-drying formula, it provides a salon-quality finish at home.",8.99,"beauty,Nail Couture",86
-6,Calvin Klein CK One,"CK One by Calvin Klein is a classic unisex fragrance, known for its fresh and clean scent. It's a versatile fragrance suitable for everyday wear.",49.99,"fragrances,Calvin Klein",87
-7,Chanel Coco Noir Eau De,"Coco Noir by Chanel is an elegant and mysterious fragrance, featuring notes of grapefruit, rose, and sandalwood. Perfect for evening occasions.",129.99,"fragrances,Chanel",85
-8,Dior J'adore,"J'adore by Dior is a luxurious and floral fragrance, known for its blend of ylang-ylang, rose, and jasmine. It embodies femininity and sophistication.",89.99,"fragrances,Dior",76
-9,Dolce Shine Eau de,"Dolce Shine by Dolce & Gabbana is a vibrant and fruity fragrance, featuring notes of mango, jasmine, and blonde woods. It's a joyful and youthful scent.",69.99,"fragrances,Dolce & Gabbana",79
-10,Gucci Bloom Eau de,"Gucci Bloom by Gucci is a floral and captivating fragrance, with notes of tuberose, jasmine, and Rangoon creeper. It's a modern and romantic scent.",79.99,"fragrances,Gucci",54
-11,Annibale Colombo Bed,"The Annibale Colombo Bed is a luxurious and elegant bed frame, crafted with high-quality materials for a comfortable and stylish bedroom.",1899.99,"furniture,Annibale Colombo",95
-12,Annibale Colombo Sofa,"The Annibale Colombo Sofa is a sophisticated and comfortable seating option, featuring exquisite design and premium upholstery for your living room.",2499.99,"furniture,Annibale Colombo",78
-13,Bedside Table African Cherry,"The Bedside Table in African Cherry is a stylish and functional addition to your bedroom, providing convenient storage space and a touch of elegance.",299.99,"furniture,Furniture Co.",57
-14,Knoll Saarinen Executive Conference Chair,"The Knoll Saarinen Executive Conference Chair is a modern and ergonomic chair, perfect for your office or conference room with its timeless design.",499.99,"furniture,Knoll",97
-15,Wooden Bathroom Sink With Mirror,"The Wooden Bathroom Sink with Mirror is a unique and stylish addition to your bathroom, featuring a wooden sink countertop and a matching mirror.",799.99,"furniture,Bath Trends",71
-16,Apple,"Fresh and crisp apples, perfect for snacking or incorporating into various recipes.",1.99,groceries,83
-17,Beef Steak,"High-quality beef steak, great for grilling or cooking to your preferred level of doneness.",12.99,groceries,89
-18,Cat Food,Nutritious cat food formulated to meet the dietary needs of your feline friend.,8.99,groceries,62
-19,Chicken Meat,"Fresh and tender chicken meat, suitable for various culinary preparations.",9.99,groceries,63
-20,Cooking Oil,"Versatile cooking oil suitable for frying, sautéing, and various culinary applications.",4.99,groceries,96
-21,Cucumber,"Crisp and hydrating cucumbers, ideal for salads, snacks, or as a refreshing side.",1.49,groceries,81
-22,Dog Food,Specially formulated dog food designed to provide essential nutrients for your canine companion.,10.99,groceries,91
-23,Eggs,"Fresh eggs, a versatile ingredient for baking, cooking, or breakfast.",2.99,groceries,50
-24,Fish Steak,"Quality fish steak, suitable for grilling, baking, or pan-searing.",14.99,groceries,75
-25,Green Bell Pepper,"Fresh and vibrant green bell pepper, perfect for adding color and flavor to your dishes.",1.29,groceries,65
-26,Green Chili Pepper,"Spicy green chili pepper, ideal for adding heat to your favorite recipes.",0.99,groceries,73
-27,Honey Jar,"Pure and natural honey in a convenient jar, perfect for sweetening beverages or drizzling over food.",6.99,groceries,79
-28,Ice Cream,"Creamy and delicious ice cream, available in various flavors for a delightful treat.",5.49,groceries,67
-29,Juice,"Refreshing fruit juice, packed with vitamins and great for staying hydrated.",3.99,groceries,78
-30,Kiwi,"Nutrient-rich kiwi, perfect for snacking or adding a tropical twist to your dishes.",2.49,groceries,98
-31,Lemon,"Zesty and tangy lemons, versatile for cooking, baking, or making refreshing beverages.",0.79,groceries,70
-32,Milk,"Fresh and nutritious milk, a staple for various recipes and daily consumption.",3.49,groceries,52
-33,Mulberry,"Sweet and juicy mulberries, perfect for snacking or adding to desserts and cereals.",4.99,groceries,99
-34,Nescafe Coffee,"Quality coffee from Nescafe, available in various blends for a rich and satisfying cup.",7.99,groceries,96
-35,Potatoes,"Versatile and starchy potatoes, great for roasting, mashing, or as a side dish.",2.29,groceries,96
-36,Protein Powder,"Nutrient-packed protein powder, ideal for supplementing your diet with essential proteins.",19.99,groceries,83
-37,Red Onions,"Flavorful and aromatic red onions, perfect for adding depth to your savory dishes.",1.99,groceries,84
-38,Rice,"High-quality rice, a staple for various cuisines and a versatile base for many dishes.",5.99,groceries,63
-39,Soft Drinks,"Assorted soft drinks in various flavors, perfect for refreshing beverages.",1.99,groceries,95
-40,Strawberry,"Sweet and succulent strawberries, great for snacking, desserts, or blending into smoothies.",3.99,groceries,61
-41,Tissue Paper Box,"Convenient tissue paper box for everyday use, providing soft and absorbent tissues.",2.49,groceries,53
-42,Water,"Pure and refreshing bottled water, essential for staying hydrated throughout the day.",0.99,groceries,99
-43,Decoration Swing,"The Decoration Swing is a charming addition to your home decor. Crafted with intricate details, it adds a touch of elegance and whimsy to any room.",59.99,home-decoration,63
-44,Family Tree Photo Frame,"The Family Tree Photo Frame is a sentimental and stylish way to display your cherished family memories. With multiple photo slots, it tells the story of your loved ones.",29.99,home-decoration,90
-45,House Showpiece Plant,The House Showpiece Plant is an artificial plant that brings a touch of nature to your home without the need for maintenance. It adds greenery and style to any space.,39.99,home-decoration,93
-46,Plant Pot,"The Plant Pot is a stylish container for your favorite plants. With a sleek design, it complements your indoor or outdoor garden, adding a modern touch to your plant display.",14.99,home-decoration,60
-47,Table Lamp,"The Table Lamp is a functional and decorative lighting solution for your living space. With a modern design, it provides both ambient and task lighting, enhancing the atmosphere.",49.99,home-decoration,71
-48,Bamboo Spatula,"The Bamboo Spatula is a versatile kitchen tool made from eco-friendly bamboo. Ideal for flipping, stirring, and serving various dishes.",7.99,kitchen-accessories,65
-49,Black Aluminium Cup,The Black Aluminium Cup is a stylish and durable cup suitable for both hot and cold beverages. Its sleek black design adds a modern touch to your drinkware collection.,5.99,kitchen-accessories,89
-50,Black Whisk,The Black Whisk is a kitchen essential for whisking and beating ingredients. Its ergonomic handle and sleek design make it a practical and stylish tool.,9.99,kitchen-accessories,78
-51,Boxed Blender,"The Boxed Blender is a powerful and compact blender perfect for smoothies, shakes, and more. Its convenient design and multiple functions make it a versatile kitchen appliance.",39.99,kitchen-accessories,91
-52,Carbon Steel Wok,"The Carbon Steel Wok is a versatile cooking pan suitable for stir-frying, sautéing, and deep frying. Its sturdy construction ensures even heat distribution for delicious meals.",29.99,kitchen-accessories,81
-53,Chopping Board,"The Chopping Board is an essential kitchen accessory for food preparation. Made from durable material, it provides a safe and hygienic surface for cutting and chopping.",12.99,kitchen-accessories,74
-54,Citrus Squeezer Yellow,The Citrus Squeezer in Yellow is a handy tool for extracting juice from citrus fruits. Its vibrant color adds a cheerful touch to your kitchen gadgets.,8.99,kitchen-accessories,92
-55,Egg Slicer,"The Egg Slicer is a convenient tool for slicing boiled eggs evenly. It's perfect for salads, sandwiches, and other dishes where sliced eggs are desired.",6.99,kitchen-accessories,61
-56,Electric Stove,The Electric Stove provides a portable and efficient cooking solution. Ideal for small kitchens or as an additional cooking surface for various culinary needs.,49.99,kitchen-accessories,82
-57,Fine Mesh Strainer,The Fine Mesh Strainer is a versatile tool for straining liquids and sifting dry ingredients. Its fine mesh ensures efficient filtering for smooth cooking and baking.,9.99,kitchen-accessories,60
-58,Fork,The Fork is a classic utensil for various dining and serving purposes. Its durable and ergonomic design makes it a reliable choice for everyday use.,3.99,kitchen-accessories,62
-59,Glass,The Glass is a versatile and elegant drinking vessel suitable for a variety of beverages. Its clear design allows you to enjoy the colors and textures of your drinks.,4.99,kitchen-accessories,80
-60,Grater Black,"The Grater in Black is a handy kitchen tool for grating cheese, vegetables, and more. Its sleek design and sharp blades make food preparation efficient and easy.",10.99,kitchen-accessories,64
-61,Hand Blender,"The Hand Blender is a versatile kitchen appliance for blending, pureeing, and mixing. Its compact design and powerful motor make it a convenient tool for various recipes.",34.99,kitchen-accessories,77
-62,Ice Cube Tray,The Ice Cube Tray is a practical accessory for making ice cubes in various shapes. Perfect for keeping your drinks cool and adding a fun element to your beverages.,5.99,kitchen-accessories,94
-63,Kitchen Sieve,The Kitchen Sieve is a versatile tool for sifting and straining dry and wet ingredients. Its fine mesh design ensures smooth results in your cooking and baking.,7.99,kitchen-accessories,61
-64,Knife,"The Knife is an essential kitchen tool for chopping, slicing, and dicing. Its sharp blade and ergonomic handle make it a reliable choice for food preparation.",14.99,kitchen-accessories,65
-65,Lunch Box,"The Lunch Box is a convenient and portable container for packing and carrying your meals. With compartments for different foods, it's perfect for on-the-go dining.",12.99,kitchen-accessories,98
-66,Microwave Oven,"The Microwave Oven is a versatile kitchen appliance for quick and efficient cooking, reheating, and defrosting. Its compact size makes it suitable for various kitchen setups.",89.99,kitchen-accessories,96
-67,Mug Tree Stand,The Mug Tree Stand is a stylish and space-saving solution for organizing your mugs. Keep your favorite mugs easily accessible and neatly displayed in your kitchen.,15.99,kitchen-accessories,52
-68,Pan,"The Pan is a versatile and essential cookware item for frying, sautéing, and cooking various dishes. Its non-stick coating ensures easy food release and cleanup.",24.99,kitchen-accessories,55
-69,Plate,The Plate is a classic and essential dishware item for serving meals. Its durable and stylish design makes it suitable for everyday use or special occasions.,3.99,kitchen-accessories,73
-70,Red Tongs,The Red Tongs are versatile kitchen tongs suitable for various cooking and serving tasks. Their vibrant color adds a pop of excitement to your kitchen utensils.,6.99,kitchen-accessories,88
-71,Silver Pot With Glass Cap,"The Silver Pot with Glass Cap is a stylish and functional cookware item for boiling, simmering, and preparing delicious meals. Its glass cap allows you to monitor cooking progress.",39.99,kitchen-accessories,64
-72,Slotted Turner,"The Slotted Turner is a kitchen utensil designed for flipping and turning food items. Its slotted design allows excess liquid to drain, making it ideal for frying and sautéing.",8.99,kitchen-accessories,68
-73,Spice Rack,The Spice Rack is a convenient organizer for your spices and seasonings. Keep your kitchen essentials within reach and neatly arranged with this stylish spice rack.,19.99,kitchen-accessories,97
-74,Spoon,"The Spoon is a versatile kitchen utensil for stirring, serving, and tasting. Its ergonomic design and durable construction make it an essential tool for every kitchen.",4.99,kitchen-accessories,80
-75,Tray,"The Tray is a functional and decorative item for serving snacks, appetizers, or drinks. Its stylish design makes it a versatile accessory for entertaining guests.",16.99,kitchen-accessories,92
-76,Wooden Rolling Pin,The Wooden Rolling Pin is a classic kitchen tool for rolling out dough for baking. Its smooth surface and sturdy handles make it easy to achieve uniform thickness.,11.99,kitchen-accessories,58
-77,Yellow Peeler,The Yellow Peeler is a handy tool for peeling fruits and vegetables with ease. Its bright yellow color adds a cheerful touch to your kitchen gadgets.,5.99,kitchen-accessories,84
-78,Apple MacBook Pro 14 Inch Space Grey,"The MacBook Pro 14 Inch in Space Grey is a powerful and sleek laptop, featuring Apple's M1 Pro chip for exceptional performance and a stunning Retina display.",1999.99,"laptops,Apple",73
-79,Asus Zenbook Pro Dual Screen Laptop,"The Asus Zenbook Pro Dual Screen Laptop is a high-performance device with dual screens, providing productivity and versatility for creative professionals.",1799.99,"laptops,Asus",79
-80,Huawei Matebook X Pro,"The Huawei Matebook X Pro is a slim and stylish laptop with a high-resolution touchscreen display, offering a premium experience for users on the go.",1399.99,"laptops,Huawei",99
-81,Lenovo Yoga 920,"The Lenovo Yoga 920 is a 2-in-1 convertible laptop with a flexible hinge, allowing you to use it as a laptop or tablet, offering versatility and portability.",1099.99,"laptops,Lenovo",57
-82,New DELL XPS 13 9300 Laptop,"The New DELL XPS 13 9300 Laptop is a compact and powerful device, featuring a virtually borderless InfinityEdge display and high-end performance for various tasks.",1499.99,"laptops,Dell",53
-83,Blue & Black Check Shirt,"The Blue & Black Check Shirt is a stylish and comfortable men's shirt featuring a classic check pattern. Made from high-quality fabric, it's suitable for both casual and semi-formal occasions.",29.99,"mens-shirts,Fashion Trends",72
-84,Gigabyte Aorus Men Tshirt,"The Gigabyte Aorus Men Tshirt is a cool and casual shirt for gaming enthusiasts. With the Aorus logo and sleek design, it's perfect for expressing your gaming style.",24.99,"mens-shirts,Gigabyte",63
-85,Man Plaid Shirt,The Man Plaid Shirt is a timeless and versatile men's shirt with a classic plaid pattern. Its comfortable fit and casual style make it a wardrobe essential for various occasions.,34.99,"mens-shirts,Classic Wear",69
-86,Man Short Sleeve Shirt,"The Man Short Sleeve Shirt is a breezy and stylish option for warm days. With a comfortable fit and short sleeves, it's perfect for a laid-back yet polished look.",19.99,"mens-shirts,Casual Comfort",58
-87,Men Check Shirt,"The Men Check Shirt is a classic and versatile shirt featuring a stylish check pattern. Suitable for various occasions, it adds a smart and polished touch to your wardrobe.",27.99,"mens-shirts,Urban Chic",54
-88,Nike Air Jordan 1 Red And Black,"The Nike Air Jordan 1 in Red and Black is an iconic basketball sneaker known for its stylish design and high-performance features, making it a favorite among sneaker enthusiasts and athletes.",149.99,"mens-shoes,Nike",95
-89,Nike Baseball Cleats,Nike Baseball Cleats are designed for maximum traction and performance on the baseball field. They provide stability and support for players during games and practices.,79.99,"mens-shoes,Nike",77
-90,Puma Future Rider Trainers,"The Puma Future Rider Trainers offer a blend of retro style and modern comfort. Perfect for casual wear, these trainers provide a fashionable and comfortable option for everyday use.",89.99,"mens-shoes,Puma",98
+1,iPhone 15 Pro,Latest Apple smartphone with A17 chip,999,"electronics,phone,apple",95
+2,Samsung Galaxy S24,Flagship Android phone,899,"electronics,phone,samsung,android",90
+3,Sony WH-1000XM5,Premium noise-cancelling headphones,399,"electronics,audio,headphones,sony",88
+4,MacBook Pro 14,"M3 chip, 16GB RAM, professional laptop",1999,"electronics,laptop,apple,computer",92
+5,iPad Air,10.9-inch tablet for work and play,599,"electronics,tablet,apple",85
+6,AirPods Pro 2,Active noise cancellation earbuds,249,"electronics,audio,earbuds,apple",93
+7,Dell XPS 15,High-performance Windows laptop,1799,"electronics,laptop,dell,computer,windows",82
+8,"LG OLED TV 55""",4K OLED smart television,1499,"electronics,tv,lg,oled",87
+9,Nike Air Max Running Shoes,Comfortable running shoes,140,"fitness,running,shoes,nike",89
+10,Lululemon Yoga Mat,Premium non-slip yoga mat,78,"fitness,yoga,mat,lululemon",84
+11,Bowflex Adjustable Dumbbells,5-52.5 lbs per dumbbell,349,"fitness,strength,weights,bowflex",86
+12,Fitbit Charge 6,Advanced fitness tracker,159,"fitness,tracker,wearable,fitbit",81
+13,Adidas Ultraboost,Energy-returning running shoes,180,"fitness,running,shoes,adidas",88
+14,Hydro Flask 32oz,Insulated water bottle,45,"fitness,hydration,bottle",79
+15,Ninja Air Fryer,6-quart air fryer with multiple functions,119,"home,kitchen,appliance,ninja",91
+16,Vitamix Blender,Professional-grade blender,449,"home,kitchen,appliance,vitamix",85
+17,Instant Pot Duo,7-in-1 electric pressure cooker,89,"home,kitchen,appliance,instantpot",90
+18,Dyson V15 Vacuum,Cordless stick vacuum cleaner,649,"home,cleaning,appliance,dyson",87
+19,Nespresso Machine,Original espresso coffee maker,199,"home,kitchen,coffee,nespresso",86
+20,Ray-Ban Aviator Sunglasses,Classic aviator style,154,"fashion,sunglasses,rayban,accessories",83
+21,Fossil Smartwatch,Hybrid smartwatch with classic design,195,"fashion,watch,fossil,wearable",78
+22,North Face Backpack,30L outdoor daypack,89,"fashion,backpack,northface,outdoor",84
+23,Levi's 511 Jeans,Slim fit denim jeans,69,"fashion,clothing,jeans,levis",80
+24,Patagonia Fleece Jacket,Warm outdoor fleece,129,"fashion,clothing,jacket,patagonia,outdoor",86
+25,Kindle Paperwhite,Waterproof e-reader with backlight,139,"books,ereader,amazon,kindle",88
+26,Atomic Habits Book,Bestselling self-improvement book,16,"books,selfhelp,reading",92
+27,Udemy Pro Subscription,Annual learning platform access,199,"learning,online,courses,udemy",76
+28,PlayStation 5,Next-gen gaming console,499,"gaming,console,playstation,sony",94
+29,Xbox Series X,4K gaming console,499,"gaming,console,xbox,microsoft",91
+30,Nintendo Switch OLED,Portable gaming console,349,"gaming,console,nintendo,portable",89

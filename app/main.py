@@ -26,7 +26,6 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup():
-    # Load environment variables if a .env file exists at project root
     root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     env_path = os.path.join(root, ".env")
     if os.path.exists(env_path):
@@ -51,13 +50,12 @@ class ProductOut(BaseModel):
 
 @app.post("/load-sample-data")
 def load_sample_data(session: Session = Depends(get_session)):
-    # ensure tables exist in case startup event didn't run (e.g., tests)
+    # ensure tables exist in case startup event didn't run
     init_db()
     # simple guard: only load if empty
     if session.exec(select(Product)).first():
         return {"status": "already-loaded"}
 
-    # products
     products = [
         Product(name="Trail Running Shoes", description="Cushioned trail shoes", price=129.0, tags="running,trail,shoes", popularity=8),
         Product(name="Road Running Shoes", description="Lightweight road shoes", price=119.0, tags="running,road,shoes", popularity=9),
@@ -68,13 +66,11 @@ def load_sample_data(session: Session = Depends(get_session)):
     ]
     for p in products:
         session.add(p)
-    # users
     users = [User(name="Alice"), User(name="Bob")]
     for u in users:
         session.add(u)
     session.commit()
 
-    # interactions
     alice_id = users[0].id
     bob_id = users[1].id
     all_products = session.exec(select(Product)).all()
@@ -112,7 +108,6 @@ async def recommendations(req: RecRequest, session: Session = Depends(get_sessio
             sig_parts.append(f"aligned with interests: {', '.join(pb.tags)}")
         signals = "; ".join(sig_parts) or "your interests"
 
-    # generate explanations concurrently
     tasks = [explain(p.name, signals) for p in products]
     explanations = await asyncio.gather(*tasks)
 
@@ -144,7 +139,6 @@ def data_info(session: Session = Depends(get_session)):
     user_count = session.exec(select(func.count(User.id))).one()
     interaction_count = session.exec(select(func.count(Interaction.id))).one()
     
-    # Try to detect data source from product names
     sample_products = session.exec(select(Product).limit(3)).all()
     product_names = [p.name for p in sample_products]
     
@@ -176,7 +170,6 @@ def data_info(session: Session = Depends(get_session)):
 
 
 
-# Mount a tiny static demo UI
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
 if os.path.isdir(static_dir):
@@ -184,7 +177,6 @@ if os.path.isdir(static_dir):
 if os.path.isdir(data_dir):
     app.mount("/data", StaticFiles(directory=data_dir), name="data")
 
-# API endpoint: get only users with at least one interaction in the current DB
 @app.get("/active-users")
 def active_users(session: Session = Depends(get_session)):
     user_ids = set()
@@ -203,7 +195,6 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
     import subprocess
     import sys
     
-    # Clear existing data first
     session.exec(select(Interaction)).all()
     for item in session.exec(select(Interaction)):
         session.delete(item)
@@ -217,7 +208,6 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
     
     try:
         if source == "api":
-            # Run fetch_real_products.py
             result = subprocess.run(
                 [sys.executable, os.path.join(script_dir, "fetch_real_products.py")],
                 capture_output=True,
@@ -228,7 +218,6 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
                 return {"status": "error", "message": result.stderr}
             
         elif source == "synthetic":
-            # Run generate_realistic_data.py
             result = subprocess.run(
                 [sys.executable, os.path.join(script_dir, "generate_realistic_data.py")],
                 capture_output=True,
@@ -239,13 +228,11 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
                 return {"status": "error", "message": result.stderr}
             
         elif source == "sample":
-            # Use the built-in sample data
             return load_sample_data(session)
         
         else:
             return {"status": "error", "message": f"Unknown source: {source}"}
         
-        # Import the newly generated CSV data
         import_result = import_csv(session)
         
         return {

@@ -7,7 +7,7 @@ class Product(SQLModel, table=True):
     name: str
     description: str = ""
     price: float = 0.0
-    tags: str = ""  # comma-separated tags for simplicity
+    tags: str = ""  
     popularity: int = 0
 
     interactions: List["Interaction"] = Relationship(back_populates="product")
@@ -22,7 +22,7 @@ class Interaction(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id")
     product_id: int = Field(foreign_key="product.id")
-    event: str  # view, add_to_cart, purchase
+    event: str  
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
     user: Optional[User] = Relationship(back_populates="interactions")

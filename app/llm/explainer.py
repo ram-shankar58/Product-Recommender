@@ -18,7 +18,7 @@ def _want_openai() -> bool:
     return bool(os.getenv("OPENAI_API_KEY"))
 
 
-# ----- OpenAI backend -----
+# OpenAI backend
 async def _openai_explain(product_name: str, signals: str) -> str:
     try:
         from openai import AsyncOpenAI
@@ -38,7 +38,7 @@ async def _openai_explain(product_name: str, signals: str) -> str:
         return f"Recommended because it matches your interests: {signals}."
 
 
-# ----- Hugging Face backend (local) -----
+# Hugging Face backend (local)
 _HF_PIPELINE = None
 
 def _get_hf_pipeline():
@@ -49,8 +49,7 @@ def _get_hf_pipeline():
         from transformers import pipeline
         model_id = os.getenv("HF_MODEL", "google/flan-t5-small")
         cache_dir = os.getenv("HF_CACHE_DIR")
-        if not cache_dir:
-            # default to a project-local cache folder
+        if not cache_dir: # default to a project-local cache folder
             here = os.path.dirname(__file__)
             cache_dir = os.path.abspath(os.path.join(here, "..", "..", "hf_cache"))
         os.makedirs(cache_dir, exist_ok=True)
@@ -66,8 +65,7 @@ def _get_hf_pipeline():
 
 async def _hf_explain(product_name: str, signals: str) -> str:
     pipe = _get_hf_pipeline()
-    if pipe is None:
-        # fallback deterministic
+    if pipe is None: # fallback deterministic
         return f"Recommended because it matches your interests: {signals}."
     prompt = PROMPT_TEMPLATE.format(name=product_name, signals=signals)
 
@@ -79,19 +77,15 @@ async def _hf_explain(product_name: str, signals: str) -> str:
             temperature=0.7,
             num_return_sequences=1,
         )
-        # flan-t5-small returns a list of dicts with 'generated_text'
         text = out[0].get("generated_text", "").strip()
         return text or f"Recommended because it matches your interests: {signals}."
 
     return await asyncio.to_thread(_run)
 
 
-# ----- Public API -----
 async def explain(product_name: str, signals: str) -> str:
-    # Choose backend
     if _want_openai():
         return await _openai_explain(product_name, signals)
     if BACKEND == "hf":
         return await _hf_explain(product_name, signals)
-    # auto/none fallback -> deterministic string
     return f"Recommended because it matches your interests: {signals}."
