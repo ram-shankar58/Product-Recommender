@@ -21,6 +21,13 @@ Minimal demo that combines a simple recommender with LLM-powered explanations.
 cd "/home/ram/projects/Product Recommender"
 # Option A: use your system Python directly (no venv)
 pip install -r requirements.txt
+
+# Fetch REAL product data from public APIs (recommended - no auth needed!)
+python scripts/fetch_real_products.py
+
+# OR generate realistic synthetic data
+# python scripts/generate_realistic_data.py
+
 uvicorn app.main:app --reload --port 8000
 
 # Option B: use a virtualenv (recommended for isolation)
@@ -39,16 +46,52 @@ curl -X POST http://localhost:8000/load-sample-data
 # Get recommendations for user 1
 curl -X POST http://localhost:8000/recommendations -H 'content-type: application/json' -d '{"user_id": 1, "k": 5}'
 
-# Alternatively, import data from CSVs in the data/ folder
+# Import realistic data from CSVs (recommended - generated via script)
 curl -X POST http://localhost:8000/import-csv
 ```
 
 ## API
-- POST `/load-sample-data` – seed a small catalog and interactions
-- POST `/import-csv` – import from `data/products.csv`, `data/users.csv`, `data/interactions.csv`
+- POST `/load-sample-data` – seed a small catalog and interactions (basic demo)
+- POST `/import-csv` – import realistic data from `data/products.csv`, `data/users.csv`, `data/interactions.csv`
 - POST `/recommendations` – request recommendations
   - body: `{ "user_id": <int>, "k": <int?> }` or `{ "user_behavior": {"product_ids": [..], "tags": [..]}, "k": <int?> }`
   - returns: list of products with an `explanation` string per item
+
+## Data
+The project supports multiple data sources:
+
+### Option 1: Real Product Data from APIs ⭐ (Recommended)
+Fetches actual product data from public APIs:
+```fish
+python scripts/fetch_real_products.py
+```
+- **~90 real products** from DummyJSON/FakeStore APIs (electronics, fashion, furniture, etc.)
+- **20 generated users** with realistic names
+- **200 interactions** with smart user-product affinity (users prefer certain categories)
+- No authentication required!
+
+### Option 2: Realistic Synthetic Data
+Generates believable e-commerce scenarios:
+```fish
+python scripts/generate_realistic_data.py
+```
+- **30 products** across categories: Electronics, Fitness, Home, Fashion, Books, Gaming
+- **10 user personas** with distinct behaviors (Tech Enthusiast, Fitness Buff, etc.)
+- **80+ interactions** spanning 90 days with realistic patterns
+
+### Option 3: Kaggle Datasets (Advanced)
+For production-scale data:
+```fish
+# See instructions
+cat scripts/DATASET_DOWNLOAD_INSTRUCTIONS.md
+
+# Download (requires Kaggle API key)
+python scripts/download_real_data.py
+
+# Convert to our format
+python scripts/convert_dataset.py
+```
+Supports: Brazilian E-Commerce (100K orders), Instacart, H&M datasets
 
 ## Demo video
 - Record 2–3 minutes: start server, load data, request recommendations, and show explanations.

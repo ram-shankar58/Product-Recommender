@@ -132,16 +132,130 @@ async def recommendations(req: RecRequest, session: Session = Depends(get_sessio
 
 @app.get("/")
 def root():
-    return {"status": "ok", "demo": "/demo"}
+    return {"status": "ok", "demo": "/demo", "api_docs": "/docs"}
+
+
+@app.get("/data-info")
+def data_info(session: Session = Depends(get_session)):
+    """Get information about currently loaded data."""
+    from sqlmodel import func
+    
+    product_count = session.exec(select(func.count(Product.id))).one()
+    user_count = session.exec(select(func.count(User.id))).one()
+    interaction_count = session.exec(select(func.count(Interaction.id))).one()
+    
+    # Try to detect data source from product names
+    sample_products = session.exec(select(Product).limit(3)).all()
+    product_names = [p.name for p in sample_products]
+    
+    # Heuristic detection
+    data_source = "unknown"
+    if any("Essence" in name or "iPhone" in name or "Samsung" in name for name in product_names):
+        data_source = "api_real_products"
+        description = "Real products from DummyJSON/FakeStore APIs"
+    elif any("Trail Running" in name or "Yoga Mat" in name for name in product_names):
+        data_source = "synthetic_realistic"
+        description = "Generated realistic e-commerce data"
+    elif any("brazilian" in str(sample_products).lower()):
+        data_source = "kaggle_brazilian"
+        description = "Kaggle Brazilian E-Commerce dataset"
+    else:
+        data_source = "custom"
+        description = "Custom or manually loaded data"
+    
+    return {
+        "source": data_source,
+        "description": description,
+        "stats": {
+            "products": product_count,
+            "users": user_count,
+            "interactions": interaction_count
+        },
+        "sample_products": product_names[:3]
+    }
+
 
 
 # Mount a tiny static demo UI
 static_dir = os.path.join(os.path.dirname(__file__), "static")
+data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
 if os.path.isdir(static_dir):
     app.mount("/demo", StaticFiles(directory=static_dir, html=True), name="demo")
+if os.path.isdir(data_dir):
+    app.mount("/data", StaticFiles(directory=data_dir), name="data")
+
+# API endpoint: get only users with at least one interaction in the current DB
+@app.get("/active-users")
+def active_users(session: Session = Depends(get_session)):
+    user_ids = set()
+    for row in session.exec(select(Interaction.user_id)).all():
+        user_ids.add(row)
+    users = session.exec(select(User).where(User.id.in_(user_ids))).all()
+    return [{"id": u.id, "name": u.name} for u in users]
 
 
-@app.post("/import-csv")
+@app.post("/load-data-source")
+def load_data_source(source: str, session: Session = Depends(get_session)):
+    """
+    Load data from a specific source.
+    Sources: 'api', 'synthetic', 'sample'
+    """
+    import subprocess
+    import sys
+    
+    # Clear existing data first
+    session.exec(select(Interaction)).all()
+    for item in session.exec(select(Interaction)):
+        session.delete(item)
+    for item in session.exec(select(Product)):
+        session.delete(item)
+    for item in session.exec(select(User)):
+        session.delete(item)
+    session.commit()
+    
+    script_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
+    
+    try:
+        if source == "api":
+            # Run fetch_real_products.py
+            result = subprocess.run(
+                [sys.executable, os.path.join(script_dir, "fetch_real_products.py")],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            if result.returncode != 0:
+                return {"status": "error", "message": result.stderr}
+            
+        elif source == "synthetic":
+            # Run generate_realistic_data.py
+            result = subprocess.run(
+                [sys.executable, os.path.join(script_dir, "generate_realistic_data.py")],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode != 0:
+                return {"status": "error", "message": result.stderr}
+            
+        elif source == "sample":
+            # Use the built-in sample data
+            return load_sample_data(session)
+        
+        else:
+            return {"status": "error", "message": f"Unknown source: {source}"}
+        
+        # Import the newly generated CSV data
+        import_result = import_csv(session)
+        
+        return {
+            "status": "success",
+            "source": source,
+            "import_result": import_result
+        }
+        
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 def import_csv(session: Session = Depends(get_session)):
     """Import products, users, and interactions from CSV files in ./data.
     Files: data/products.csv, data/users.csv, data/interactions.csv

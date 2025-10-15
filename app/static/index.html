@@ -45,11 +45,78 @@
         box-shadow: 0 10px 40px rgba(0,0,0,0.1);
       }
       
-      .button-group {
+      .user-selector {
         display: flex;
+        align-items: center;
         gap: 1rem;
-        flex-wrap: wrap;
         margin-bottom: 1rem;
+        background: #f7fafc;
+        padding: 1rem;
+        border-radius: 8px;
+      }
+      .user-selector label {
+        font-weight: 600;
+        color: #4a5568;
+      }
+      .user-selector select {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        min-width: 220px;
+      }
+      .user-selector select:hover {
+        border-color: #48bb78;
+      }
+      
+      .data-source-selector {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #f7fafc;
+        border-radius: 8px;
+      }
+      
+      .data-source-selector label {
+        font-weight: 600;
+        color: #4a5568;
+      }
+      
+      .data-source-selector select {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+      
+      .data-source-selector select:hover {
+        border-color: #667eea;
+      }
+      
+      .data-source-info {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #718096;
+      }
+      
+      .data-badge {
+        padding: 0.25rem 0.75rem;
+        background: #667eea;
+        color: white;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
       }
       
       button {
@@ -239,10 +306,26 @@
       </header>
       
       <div class="control-panel">
-        <div class="button-group">
-          <button class="btn-primary" id="seed">📦 Load Sample Data</button>
-          <button class="btn-secondary" id="rec1">👤 Recommend for Alice</button>
-          <button class="btn-tertiary" id="rec2">👤 Recommend for Bob</button>
+        <div class="data-source-selector">
+          <label for="data-source">📊 Data Source:</label>
+          <select id="data-source">
+            <option value="">-- Select Source --</option>
+            <option value="api">🌐 Real Products (API)</option>
+            <option value="synthetic">🎲 Realistic Synthetic</option>
+            <option value="sample">📦 Built-in Sample</option>
+          </select>
+          <button class="btn-primary" id="load-source" style="padding: 0.5rem 1rem;">Load Data</button>
+          <div class="data-source-info">
+            <span id="current-source">Not loaded</span>
+          </div>
+        </div>
+        
+        <div class="user-selector">
+          <label for="user-select">👤 User:</label>
+          <select id="user-select">
+            <option value="">-- Select User --</option>
+          </select>
+          <button class="btn-secondary" id="rec-btn">Get Recommendations</button>
         </div>
         
         <div class="info-bar">
@@ -263,41 +346,129 @@
       const resultsEl = document.getElementById('results');
       const statusEl = document.getElementById('status-text');
       const countEl = document.getElementById('result-count');
-      
+      const sourceEl = document.getElementById('current-source');
+  const userSelectEl = document.getElementById('user-select');
+  const recBtnEl = document.getElementById('rec-btn');
+
       function setStatus(text) {
         statusEl.textContent = text;
       }
-      
+
+      async function fetchUsers() {
+        // Get only users with interactions from backend
+        try {
+          const r = await fetch('/active-users');
+          const users = await r.json();
+          return users;
+        } catch (e) {
+          return [];
+        }
+      }
+
+      async function renderUserDropdown() {
+        // Only show users if data is loaded (i.e. products exist)
+        let dataLoaded = false;
+        try {
+          const r = await fetch('/data-info');
+          const info = await r.json();
+          dataLoaded = info.stats.products > 0 && info.stats.users > 0;
+        } catch (e) {
+          dataLoaded = false;
+        }
+
+        userSelectEl.innerHTML = '<option value="">-- Select User --</option>';
+        if (!dataLoaded) {
+          userSelectEl.innerHTML += '<option value="" disabled>No users found (load data first)</option>';
+          userSelectEl.disabled = true;
+          recBtnEl.disabled = true;
+          return;
+        }
+        const users = await fetchUsers();
+        if (users.length === 0) {
+          userSelectEl.innerHTML += '<option value="" disabled>No users found</option>';
+          userSelectEl.disabled = true;
+          recBtnEl.disabled = true;
+          return;
+        }
+        users.forEach(user => {
+          const opt = document.createElement('option');
+          opt.value = user.id;
+          opt.textContent = user.name;
+          userSelectEl.appendChild(opt);
+        });
+        userSelectEl.disabled = false;
+        recBtnEl.disabled = false;
+      }
+
+      async function updateDataInfo() {
+        try {
+          const r = await fetch('/data-info');
+          const data = await r.json();
+
+          const sourceNames = {
+            'api_real_products': '🌐 Real Products (API)',
+            'synthetic_realistic': '🎲 Realistic Synthetic',
+            'custom': '📦 Sample Data',
+            'unknown': '❓ Unknown'
+          };
+
+          const sourceName = sourceNames[data.source] || data.description;
+          sourceEl.innerHTML = `
+            <span class="data-badge">${sourceName}</span>
+            <span>${data.stats.products} products, ${data.stats.users} users</span>
+          `;
+        } catch (e) {
+          sourceEl.textContent = 'No data loaded';
+        }
+      }
+
       function showLoading() {
         resultsEl.innerHTML = '<div class="loading"><div class="spinner"></div>Analyzing preferences...</div>';
       }
-      
+
       function showEmpty() {
         resultsEl.innerHTML = `
           <div class="empty-state">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
             </svg>
-            <p>Click "Load Sample Data" to get started!</p>
+            <p>Select a data source and click "Load Data" to get started!</p>
           </div>
         `;
       }
-      
-      async function seed() {
-        setStatus('Loading sample data...');
+
+      async function loadDataSource() {
+        const sourceSelect = document.getElementById('data-source');
+        const source = sourceSelect.value;
+
+        if (!source) {
+          alert('Please select a data source first!');
+          return;
+        }
+
+        setStatus(`Loading ${sourceSelect.options[sourceSelect.selectedIndex].text}...`);
         showLoading();
+
         try {
-          const r = await fetch('/load-sample-data', { method: 'POST' });
+          const r = await fetch(`/load-data-source?source=${source}`, { method: 'POST' });
           const data = await r.json();
-          setStatus('Data loaded successfully!');
-          showEmpty();
-          countEl.textContent = '0 recommendations';
+
+          if (data.status === 'success' || data.status === 'loaded' || data.status === 'imported') {
+            setStatus('Data loaded successfully!');
+            await updateDataInfo();
+            await renderUserDropdown();
+            showEmpty();
+            countEl.textContent = '0 recommendations';
+          } else {
+            setStatus(`Error: ${data.message || 'Unknown error'}`);
+            resultsEl.innerHTML = `<div class="loading" style="color: #fc8181;">Error loading data. ${data.message || ''}</div>`;
+          }
         } catch (e) {
           setStatus('Error loading data');
           resultsEl.innerHTML = '<div class="loading" style="color: #fc8181;">Error loading data. Check server.</div>';
         }
       }
-      
+
       async function rec(userId, userName) {
         setStatus(`Getting recommendations for ${userName}...`);
         showLoading();
@@ -308,21 +479,21 @@
             body: JSON.stringify({ user_id: userId, k: 5 })
           });
           const data = await r.json();
-          
+
           resultsEl.innerHTML = '';
           countEl.textContent = `${data.length} recommendations`;
           setStatus(`Showing recommendations for ${userName}`);
-          
+
           if (data.length === 0) {
             showEmpty();
             return;
           }
-          
+
           data.forEach((p, idx) => {
             const card = document.createElement('div');
             card.className = 'product-card';
             card.style.animationDelay = `${idx * 0.1}s`;
-            
+
             card.innerHTML = `
               <div class="product-header">
                 <div>
@@ -335,7 +506,7 @@
               </div>
               <div class="explanation">${p.explanation}</div>
             `;
-            
+
             resultsEl.appendChild(card);
           });
         } catch (e) {
@@ -343,12 +514,21 @@
           resultsEl.innerHTML = '<div class="loading" style="color: #fc8181;">Error getting recommendations. Check server.</div>';
         }
       }
-      
-      document.getElementById('seed').onclick = seed;
-      document.getElementById('rec1').onclick = () => rec(1, 'Alice');
-      document.getElementById('rec2').onclick = () => rec(2, 'Bob');
-      
-      // Show empty state on load
+
+      document.getElementById('load-source').onclick = loadDataSource;
+      recBtnEl.onclick = () => {
+        const selectedId = userSelectEl.value;
+        const selectedName = userSelectEl.options[userSelectEl.selectedIndex]?.text;
+        if (!selectedId) {
+          alert('Please select a user first!');
+          return;
+        }
+        rec(parseInt(selectedId), selectedName);
+      };
+
+      // Load data info and user dropdown on page load
+      updateDataInfo();
+      renderUserDropdown();
       showEmpty();
     </script>
   </body>
