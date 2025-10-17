@@ -48,6 +48,12 @@ class ProductOut(BaseModel):
     tags: List[str]
     explanation: str
 
+
+def _split_tags(tag_str: Optional[str]) -> List[str]:
+    if not tag_str:
+        return []
+    return [t.strip() for t in tag_str.split(",") if t.strip()]
+
 @app.post("/load-sample-data")
 def load_sample_data(session: Session = Depends(get_session)):
     # ensure tables exist in case startup event didn't run
@@ -97,18 +103,86 @@ async def recommendations(req: RecRequest, session: Session = Depends(get_sessio
 
     if req.user_id is not None:
         products = recommend_for_user(session, req.user_id, req.k)
-        signals = f"past interactions and similar tags"
+
+        # Build detailed signals per product using the user's recent interactions
+        # Fetch recent interactions (limit 10) ordered by id desc as a proxy for recency
+        recent = session.exec(
+            select(Interaction).where(Interaction.user_id == req.user_id).order_by(Interaction.id.desc()).limit(10)
+        ).all()
+        recent_items = []
+        recent_map = {}
+        for it in recent:
+            prod = session.get(Product, it.product_id)
+            if not prod:
+                continue
+            recent_items.append({"name": prod.name, "event": it.event, "tags": _split_tags(prod.tags)})
+            recent_map[prod.id] = prod
+
+        # For behavior signal we'll describe the recent items
+        signals = {
+            "recent_items": recent_items,
+            "reason": "based on past interactions and matching tags",
+        }
     else:
         pb = req.user_behavior
         products = recommend_from_behavior(session, pb.product_ids, pb.tags, req.k)
+
+        # Create a behavior-based signals object
         sig_parts = []
         if pb.product_ids:
-            sig_parts.append(f"similar to items you viewed/bought: {pb.product_ids}")
+            # Resolve product names
+            names = []
+            for pid in (pb.product_ids or []):
+                p = session.get(Product, pid)
+                if p:
+                    names.append(p.name)
+            if names:
+                sig_parts.append(f"similar to items you interacted with: {', '.join(names)}")
+            else:
+                sig_parts.append(f"similar to item ids: {pb.product_ids}")
         if pb.tags:
             sig_parts.append(f"aligned with interests: {', '.join(pb.tags)}")
-        signals = "; ".join(sig_parts) or "your interests"
 
-    tasks = [explain(p.name, signals) for p in products]
+        signals = {"behavior_note": "; ".join(sig_parts) or "your provided interests"}
+
+    # Build per-product detailed signal strings and request explanations
+    async def _explain_for_product(p):
+        # Build a human-readable signal string depending on available context
+        parts = []
+        # if we have a recent interactions structure
+        if isinstance(signals, dict) and signals.get("recent_items"):
+            # find overlapping tags between this candidate product and recent items
+            cand_tags = set(_split_tags(p.tags))
+            overlaps = []
+            cited = []
+            for recent in signals["recent_items"]:
+                common = cand_tags.intersection(set(recent.get("tags", [])))
+                if common:
+                    overlaps.append({"recent_name": recent["name"], "common_tags": list(common), "event": recent["event"]})
+                # Also cite recent purchases or add_to_cart first
+                if recent.get("event") in ("purchase", "add_to_cart"):
+                    cited.append({"name": recent["name"], "event": recent["event"]})
+
+            if cited:
+                parts.append("User recently purchased/added to cart: " + ", ".join([f"{c['name']} ({c['event']})" for c in cited]))
+            if overlaps:
+                ov_text = "; ".join([f"shared tags {', '.join(o['common_tags'])} with {o['recent_name']} ({o['event']})" for o in overlaps])
+                parts.append(ov_text)
+            parts.append(signals.get("reason", "based on past behavior"))
+
+        elif isinstance(signals, dict) and signals.get("behavior_note"):
+            parts.append(signals.get("behavior_note"))
+        else:
+            parts.append(str(signals))
+
+        # Add product popularity hint if available
+        if getattr(p, "popularity", None) is not None:
+            parts.append(f"product popularity score: {getattr(p, 'popularity')}")
+
+        signal_str = "; ".join(parts)
+        return await explain(p.name, signal_str)
+
+    tasks = [_explain_for_product(p) for p in products]
     explanations = await asyncio.gather(*tasks)
 
     result: List[ProductOut] = []
@@ -192,10 +266,7 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
     Load data from a specific source.
     Sources: 'api', 'synthetic', 'sample'
     """
-    import subprocess
-    import sys
-    
-    session.exec(select(Interaction)).all()
+    # Clear existing data
     for item in session.exec(select(Interaction)):
         session.delete(item)
     for item in session.exec(select(Product)):
@@ -203,45 +274,86 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
     for item in session.exec(select(User)):
         session.delete(item)
     session.commit()
-    
-    script_dir = os.path.join(os.path.dirname(__file__), "..", "scripts")
-    
+
     try:
         if source == "api":
-            result = subprocess.run(
-                [sys.executable, os.path.join(script_dir, "fetch_real_products.py")],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            if result.returncode != 0:
-                return {"status": "error", "message": result.stderr}
-            
+            # Import data directly from the fetch_real_products helper functions
+            from scripts.fetch_real_products import fetch_dummyjson_products, fetch_fakestore_products, generate_realistic_users, generate_interactions
+
+            try:
+                products = fetch_dummyjson_products()
+            except Exception:
+                products = fetch_fakestore_products()
+
+            users = generate_realistic_users(20)
+            interactions = generate_interactions(products, users, 200)
+
         elif source == "synthetic":
-            result = subprocess.run(
-                [sys.executable, os.path.join(script_dir, "generate_realistic_data.py")],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            if result.returncode != 0:
-                return {"status": "error", "message": result.stderr}
-            
+            # Use in-repo generator to provide data structures
+            from scripts.generate_realistic_data import PRODUCTS as gen_products, USER_PERSONAS, generate_interactions as gen_interactions
+
+            # Convert constant products to dict-like list to match expected shape
+            products = [
+                {"id": p["id"], "name": p["name"], "description": p.get("description", ""), "price": p.get("price", 0), "tags": p.get("tags", ""), "popularity": p.get("popularity", 0)}
+                for p in gen_products
+            ]
+            users = [{"id": u["id"], "name": u["name"]} for u in USER_PERSONAS]
+            interactions = gen_interactions()
+
         elif source == "sample":
             return load_sample_data(session)
-        
+
         else:
             return {"status": "error", "message": f"Unknown source: {source}"}
-        
-        import_result = import_csv(session)
-        
-        return {
-            "status": "success",
-            "source": source,
-            "import_result": import_result
-        }
-        
+
+        # Insert products, users, and interactions into the DB using session
+        orig_prod_to_db = {}
+        for prod in products:
+            p = Product(name=prod.get("name", ""), description=prod.get("description", ""), price=float(prod.get("price", 0) or 0), tags=prod.get("tags", ""), popularity=int(prod.get("popularity", 0) or 0))
+            session.add(p)
+            session.flush()
+            orig_id = prod.get("id")
+            if orig_id is not None:
+                orig_prod_to_db[int(orig_id)] = p.id
+
+        orig_user_to_db = {}
+        for u in users:
+            user_obj = User(name=u.get("name", ""))
+            session.add(user_obj)
+            session.flush()
+            orig_uid = u.get("id")
+            if orig_uid is not None:
+                orig_user_to_db[int(orig_uid)] = user_obj.id
+
+        # Add interactions (map original ids to DB ids where possible)
+        created_inter = 0
+        from datetime import datetime
+        for it in interactions:
+            # incoming interactions may have keys user_id/product_id or user_id_new/product_id_new
+            orig_uid = int(it.get("user_id") or it.get("user_id_new"))
+            orig_pid = int(it.get("product_id") or it.get("product_id_new") or it.get("product_id"))
+            db_uid = orig_user_to_db.get(orig_uid)
+            db_pid = orig_prod_to_db.get(orig_pid)
+            if db_uid is None or db_pid is None:
+                # skip interactions that cannot be mapped
+                continue
+            ts = it.get("timestamp")
+            ts_val = None
+            if ts:
+                try:
+                    ts_val = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                except Exception:
+                    ts_val = None
+            inter = Interaction(user_id=db_uid, product_id=db_pid, event=it.get("event", "view"), timestamp=ts_val)
+            session.add(inter)
+            created_inter += 1
+
+        session.commit()
+
+        return {"status": "success", "source": source, "import_result": {"products": len(products), "users": len(users), "interactions": created_inter}}
+
     except Exception as e:
+        session.rollback()
         return {"status": "error", "message": str(e)}
 def import_csv(session: Session = Depends(get_session)):
     """Import products, users, and interactions from CSV files in ./data.
