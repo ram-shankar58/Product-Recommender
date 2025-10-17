@@ -2,10 +2,8 @@ from typing import List, Dict, Optional
 from sqlmodel import Session, select
 from ..db.models import Product, Interaction
 
-#  tag-based recommender with popularity boost.
 
 def recommend_for_user(session: Session, user_id: int, k: int = 5) -> List[Product]:
-    # Collect user tag preferences from their interactions
     interactions = session.exec(
         select(Interaction).where(Interaction.user_id == user_id)
     ).all()
@@ -25,7 +23,6 @@ def recommend_for_user(session: Session, user_id: int, k: int = 5) -> List[Produ
         for t in [t.strip().lower() for t in product.tags.split(",") if t.strip()]:
             liked_tags[t] = liked_tags.get(t, 0) + weight
 
-    # Score all products by tag overlap + popularity
     products = session.exec(select(Product)).all()
     scored = []
     for p in products:

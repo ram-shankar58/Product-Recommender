@@ -15,11 +15,9 @@ def _want_openai() -> bool:
         return True
     if BACKEND == "hf" or BACKEND == "none":
         return False
-    # auto
     return bool(os.getenv("OPENAI_API_KEY"))
 
 
-# OpenAI backend
 async def _openai_explain(product_name: str, signals: str) -> str:
     try:
         from openai import AsyncOpenAI
@@ -39,7 +37,6 @@ async def _openai_explain(product_name: str, signals: str) -> str:
         return _deterministic_explain(product_name, signals)
 
 
-# Hugging Face backend (local)
 _HF_PIPELINE = None
 
 def _get_hf_pipeline():
@@ -101,10 +98,7 @@ def _deterministic_explain(product_name: str, signals: str) -> str:
     if not signals:
         return f"{product_name}: Recommended because it matches your interests and past activity."
 
-    # Try to extract recent purchased/added items
     purchase_match = re.search(r"User recently purchased/added to cart:\s*([^;]+)", signals)
-    # Find shared tags mentions
-    # This looks for patterns like 'shared tags tag1, tag2 with Item Name (event)'
     shared_tags_match = re.search(r"shared tags\s*([^;]+)\s*with\s*([^;]+)", signals)
     pop_match = re.search(r"product popularity score:\s*(\d+)", signals)
 
@@ -120,7 +114,6 @@ def _deterministic_explain(product_name: str, signals: str) -> str:
         parts.append(f"This item shares tags {tags} with {recent_name}.")
 
     if not parts:
-        # Fallback: include a trimmed version of the signals
         summary = signals
         if len(summary) > 200:
             summary = summary[:197] + "..."

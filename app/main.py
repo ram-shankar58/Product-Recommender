@@ -56,9 +56,7 @@ def _split_tags(tag_str: Optional[str]) -> List[str]:
 
 @app.post("/load-sample-data")
 def load_sample_data(session: Session = Depends(get_session)):
-    # ensure tables exist in case startup event didn't run
     init_db()
-    # simple guard: only load if empty
     if session.exec(select(Product)).first():
         return {"status": "already-loaded"}
 
@@ -104,8 +102,6 @@ async def recommendations(req: RecRequest, session: Session = Depends(get_sessio
     if req.user_id is not None:
         products = recommend_for_user(session, req.user_id, req.k)
 
-        # Build detailed signals per product using the user's recent interactions
-        # Fetch recent interactions (limit 10) ordered by id desc as a proxy for recency
         recent = session.exec(
             select(Interaction).where(Interaction.user_id == req.user_id).order_by(Interaction.id.desc()).limit(10)
         ).all()
@@ -118,7 +114,6 @@ async def recommendations(req: RecRequest, session: Session = Depends(get_sessio
             recent_items.append({"name": prod.name, "event": it.event, "tags": _split_tags(prod.tags)})
             recent_map[prod.id] = prod
 
-        # For behavior signal we'll describe the recent items
         signals = {
             "recent_items": recent_items,
             "reason": "based on past interactions and matching tags",
@@ -127,10 +122,8 @@ async def recommendations(req: RecRequest, session: Session = Depends(get_sessio
         pb = req.user_behavior
         products = recommend_from_behavior(session, pb.product_ids, pb.tags, req.k)
 
-        # Create a behavior-based signals object
         sig_parts = []
         if pb.product_ids:
-            # Resolve product names
             names = []
             for pid in (pb.product_ids or []):
                 p = session.get(Product, pid)
@@ -145,13 +138,9 @@ async def recommendations(req: RecRequest, session: Session = Depends(get_sessio
 
         signals = {"behavior_note": "; ".join(sig_parts) or "your provided interests"}
 
-    # Build per-product detailed signal strings and request explanations
     async def _explain_for_product(p):
-        # Build a human-readable signal string depending on available context
         parts = []
-        # if we have a recent interactions structure
         if isinstance(signals, dict) and signals.get("recent_items"):
-            # find overlapping tags between this candidate product and recent items
             cand_tags = set(_split_tags(p.tags))
             overlaps = []
             cited = []
@@ -159,7 +148,6 @@ async def recommendations(req: RecRequest, session: Session = Depends(get_sessio
                 common = cand_tags.intersection(set(recent.get("tags", [])))
                 if common:
                     overlaps.append({"recent_name": recent["name"], "common_tags": list(common), "event": recent["event"]})
-                # Also cite recent purchases or add_to_cart first
                 if recent.get("event") in ("purchase", "add_to_cart"):
                     cited.append({"name": recent["name"], "event": recent["event"]})
 
@@ -175,7 +163,6 @@ async def recommendations(req: RecRequest, session: Session = Depends(get_sessio
         else:
             parts.append(str(signals))
 
-        # Add product popularity hint if available
         if getattr(p, "popularity", None) is not None:
             parts.append(f"product popularity score: {getattr(p, 'popularity')}")
 
@@ -216,7 +203,6 @@ def data_info(session: Session = Depends(get_session)):
     sample_products = session.exec(select(Product).limit(3)).all()
     product_names = [p.name for p in sample_products]
     
-    # Heuristic detection
     data_source = "unknown"
     if any("Essence" in name or "iPhone" in name or "Samsung" in name for name in product_names):
         data_source = "api_real_products"
@@ -266,7 +252,6 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
     Load data from a specific source.
     Sources: 'api', 'synthetic', 'sample'
     """
-    # Clear existing data
     for item in session.exec(select(Interaction)):
         session.delete(item)
     for item in session.exec(select(Product)):
@@ -277,7 +262,6 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
 
     try:
         if source == "api":
-            # Import data directly from the fetch_real_products helper functions
             from scripts.fetch_real_products import fetch_dummyjson_products, fetch_fakestore_products, generate_realistic_users, generate_interactions
 
             try:
@@ -289,10 +273,8 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
             interactions = generate_interactions(products, users, 200)
 
         elif source == "synthetic":
-            # Use in-repo generator to provide data structures
             from scripts.generate_realistic_data import PRODUCTS as gen_products, USER_PERSONAS, generate_interactions as gen_interactions
 
-            # Convert constant products to dict-like list to match expected shape
             products = [
                 {"id": p["id"], "name": p["name"], "description": p.get("description", ""), "price": p.get("price", 0), "tags": p.get("tags", ""), "popularity": p.get("popularity", 0)}
                 for p in gen_products
@@ -306,7 +288,6 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
         else:
             return {"status": "error", "message": f"Unknown source: {source}"}
 
-        # Insert products, users, and interactions into the DB using session
         orig_prod_to_db = {}
         for prod in products:
             p = Product(name=prod.get("name", ""), description=prod.get("description", ""), price=float(prod.get("price", 0) or 0), tags=prod.get("tags", ""), popularity=int(prod.get("popularity", 0) or 0))
@@ -325,17 +306,14 @@ def load_data_source(source: str, session: Session = Depends(get_session)):
             if orig_uid is not None:
                 orig_user_to_db[int(orig_uid)] = user_obj.id
 
-        # Add interactions (map original ids to DB ids where possible)
         created_inter = 0
         from datetime import datetime
         for it in interactions:
-            # incoming interactions may have keys user_id/product_id or user_id_new/product_id_new
             orig_uid = int(it.get("user_id") or it.get("user_id_new"))
             orig_pid = int(it.get("product_id") or it.get("product_id_new") or it.get("product_id"))
             db_uid = orig_user_to_db.get(orig_uid)
             db_pid = orig_prod_to_db.get(orig_pid)
             if db_uid is None or db_pid is None:
-                # skip interactions that cannot be mapped
                 continue
             ts = it.get("timestamp")
             ts_val = None
@@ -411,7 +389,6 @@ def import_csv(session: Session = Depends(get_session)):
 
 @app.get("/favicon.ico")
 def favicon():
-    # Serve favicon if present, otherwise return 204 to avoid 404 spam in logs
     static_dir = os.path.join(os.path.dirname(__file__), "static")
     icon_path = os.path.join(static_dir, "favicon.ico")
     if os.path.exists(icon_path):
